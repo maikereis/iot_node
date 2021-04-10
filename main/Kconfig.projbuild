@@ -1,0 +1,829 @@
+menu "PROJECT: common_sloth"
+
+    menu "Wifi"
+    config ESP_WIFI_SSID
+        string "WiFi SSID"
+        default "myssid"
+        help
+            SSID (network name) for the example to connect to.
+
+    config ESP_WIFI_PASSWORD
+        string "WiFi Password"
+        default "mypassword"
+        help
+            WiFi password (WPA or WPA2) for the example to use.
+
+    config ESP_WIFI_RETRY
+        int "Maximum retry"
+        default 10
+        help
+            Set the Maximum retry to avoid station reconnecting to the AP unlimited when the AP is really inexistent.
+    endmenu
+
+    menu "MQTT"
+    config BROKER_URL
+        string "Broker URL"
+        default "192.168.0.5"
+    
+    config BROKER_PORT
+        int "Broker PORT"
+        default 1883
+        
+    config CLIENT_USERNAME
+        string "Client Username"
+        default "clientusername"
+
+    config CLIENT_PASSWORD
+        string "Client Password"
+        default "clientpassword"
+
+    config CLIENT_ID
+        string "Client ID"
+        default "cli_id"
+    endmenu
+
+    menu "NTP"
+
+        config SNTP_SERVER
+            string "Server URL"
+            default "a.ntp.br"
+        
+        config SNTP_TIME_ZONE
+            string "GMT+3"
+            default "GMT+3"
+
+        config SNTP_MAX_SYNC_RETRY
+            int "Maximun retry"
+            default 10
+
+    endmenu
+
+    menu "SPIFFS"
+
+        config SPIFFS_FILE_PATH
+            string "File path"
+            default "/spiffs/data.txt"
+    endmenu
+
+    menu "Sleep"
+
+        config ESP_SLEEP_TIME
+            int "Sleep Time in seconds"
+            default 120
+        
+        config ESP_MEASUREMENT_CYCLE
+            int "Measurement cycle"
+            default 10
+            help 
+                Number of measurements until send data to broker
+    endmenu
+
+    menu "Voltage sensor"
+        config VOLTAGE_SENSOR
+            bool "Enable"
+            default n
+
+        choice VOLTAGE_SELECT_ADC
+            depends on VOLTAGE_SENSOR
+            tristate "Select voltage sensor ADC"
+            help
+                Esp32 has 2 SARS ADC's, ADC1 and ADC2. ADC2 is used by wi-fi, therefore, is extremely recommended choose ADC1
+            config VOLTAGE_ADC_UNIT_1
+                tristate  "The voltage sensor uses ADC1"
+            config VOLTAGE_ADC_UNIT_2
+                tristate "The voltage sensor uses ADC2"
+        endchoice
+            
+        config VOLTAGE_ADC_UNIT
+            depends on VOLTAGE_SENSOR
+            int
+            default 1 if VOLTAGE_ADC_UNIT_1
+            default 2 if VOLTAGE_ADC_UNIT_2
+
+
+        choice VOLTAGE_GPIO1
+            depends on VOLTAGE_ADC_UNIT_1
+            bool "Sensor ADC1 Channel"
+            default VOLTAGE_ADC1_CHANNEL_6
+            help
+                The channel of ADC1 used by voltage sensor.
+            config VOLTAGE_ADC1_CHANNEL_0
+                bool "ADC1 Channel 0 (GPIO 36)"
+            config VOLTAGE_ADC1_CHANNEL_1
+                bool "ADC1 Channel 1 (GPIO 37)"
+            config VOLTAGE_ADC1_CHANNEL_2
+                bool "ADC1 Channel 2 (GPIO 38)"
+            config VOLTAGE_ADC1_CHANNEL_3
+                bool "ADC1 Channel 3 (GPIO 39)"
+            config VOLTAGE_ADC1_CHANNEL_4
+                bool "ADC1 Channel 4 (GPIO 32)"
+            config VOLTAGE_ADC1_CHANNEL_5
+                bool "ADC1 Channel 5 (GPIO 33)"
+            config VOLTAGE_ADC1_CHANNEL_6
+                bool "ADC1 Channel 6 (GPIO 34)"
+            config VOLTAGE_ADC1_CHANNEL_7
+                bool "ADC1 Channel 7 (GPIO 35)"
+        endchoice
+        
+        config VOLTAGE_GPIO1
+            int
+            default 0 if VOLTAGE_ADC1_CHANNEL_0
+            default 1 if VOLTAGE_ADC1_CHANNEL_1
+            default 2 if VOLTAGE_ADC1_CHANNEL_2
+            default 3 if VOLTAGE_ADC1_CHANNEL_3
+            default 4 if VOLTAGE_ADC1_CHANNEL_4
+            default 5 if VOLTAGE_ADC1_CHANNEL_5
+            default 6 if VOLTAGE_ADC1_CHANNEL_6
+            default 7 if VOLTAGE_ADC1_CHANNEL_7
+        
+        
+        
+        choice VOLTAGE_GPIO2
+            depends on VOLTAGE_ADC_UNIT_2
+            bool "Sensor ADC2 Channel"
+            help
+                The channel of ADC1 used by voltage sensor.
+            config VOLTAGE_ADC2_CHANNEL_0
+                bool "ADC2 Channel 0 (GPIO 4)"
+            config VOLTAGE_ADC2_CHANNEL_1
+                bool "ADC2 Channel 1 (GPIO 0)"
+            config VOLTAGE_ADC2_CHANNEL_2
+                bool "ADC2 Channel 2 (GPIO 2)"
+            config VOLTAGE_ADC2_CHANNEL_3
+                bool "ADC2 Channel 3 (GPIO 15)"
+            config VOLTAGE_ADC2_CHANNEL_4
+                bool "ADC2 Channel 4 (GPIO 13)"
+            config VOLTAGE_ADC2_CHANNEL_5
+                bool "ADC2 Channel 5 (GPIO 12)"
+            config VOLTAGE_ADC2_CHANNEL_6
+                bool "ADC2 Channel 6 (GPIO 14)"
+            config VOLTAGE_ADC2_CHANNEL_7
+                bool "ADC2 Channel 7 (GPIO 27)"
+            config VOLTAGE_ADC2_CHANNEL_8
+                bool "ADC2 Channel 8 (GPIO 25)"
+            config VOLTAGE_ADC2_CHANNEL_9
+                bool "ADC2 Channel 9 (GPIO 26)"
+        endchoice
+        config VOLTAGE_GPIO2
+            int
+            default 0 if VOLTAGE_ADC2_CHANNEL_0
+            default 1 if VOLTAGE_ADC2_CHANNEL_1
+            default 2 if VOLTAGE_ADC2_CHANNEL_2
+            default 3 if VOLTAGE_ADC2_CHANNEL_3
+            default 4 if VOLTAGE_ADC2_CHANNEL_4
+            default 5 if VOLTAGE_ADC2_CHANNEL_5
+            default 6 if VOLTAGE_ADC2_CHANNEL_6
+            default 7 if VOLTAGE_ADC2_CHANNEL_7
+            default 8 if VOLTAGE_ADC2_CHANNEL_8
+            default 9 if VOLTAGE_ADC2_CHANNEL_9
+        
+        config VOLTAGE_CHANNEL
+            int
+            default VOLTAGE_GPIO1 if VOLTAGE_ADC_UNIT_1
+            default VOLTAGE_GPIO2 if VOLTAGE_ADC_UNIT_2
+
+        choice VOLTAGE_ATTEN
+            depends on VOLTAGE_SENSOR
+            bool "Select ADC attenuation"
+            default VOLTAGE_ADC_ATTENUATION_0
+            help
+                Esp32 has 2 SARS ADC's, ADC1 and ADC2. ADC2 is used by wi-fi, therefore, is extremely recommended choose ADC1
+            config VOLTAGE_ADC_ATTENUATION_0
+                bool "ADC attenuation 0db"
+            config VOLTAGE_ADC_ATTENUATION_2_5
+                bool "ADC attenuation 2.5db"
+            config VOLTAGE_ADC_ATTENUATION_6
+                bool "ADC attenuation 6db"
+            config VOLTAGE_ADC_ATTENUATION_11
+                 bool "ADC attenuation 11db"
+                    
+        endchoice
+                    
+        config VOLTAGE_ATTEN
+            int
+            default 0 if VOLTAGE_ADC_ATTENUATION_0
+            default 1 if VOLTAGE_ADC_ATTENUATION_2_5
+            default 2 if VOLTAGE_ADC_ATTENUATION_6
+            default 3 if VOLTAGE_ADC_ATTENUATION_11
+                    
+        config VOLTAGE_OFFSET
+            int "Voltage signal offset"
+            depends on VOLTAGE_SENSOR
+            default 540
+            help
+                The sensor signal has a DC component?
+
+        config VOLTAGE_CROSSINGS
+            int "Number of crossings to sample"
+            depends on VOLTAGE_SENSOR
+            default 100
+            help
+                How many crossings do you want to sample?
+
+        config VOLTAGE_TIMEMOUT
+            int "Maxiumum time spent in sampling (ms)"
+            depends on VOLTAGE_SENSOR
+            default 2000
+            help
+                How many time the logger can spent sampling the signal? Consider a signal frequency and number of crossings
+
+    endmenu
+
+
+    menu "Current sensor"
+        config CURRENT_SENSOR
+            bool "Enable"
+            default n
+            help
+                This logger has a current sensor?
+
+        choice CURRENT_SELECT_ADC
+            depends on CURRENT_SENSOR
+            bool "Select current sensor ADC"
+            default CURRENT_ADC_UNIT_1
+            help
+                Esp32 has 2 SARS ADC's, ADC1 and ADC2. ADC2 is used by wi-fi, therefore, is extremely recommended choose ADC1
+            config CURRENT_ADC_UNIT_1
+                bool "The current sensor uses ADC1"
+            config CURRENT_ADC_UNIT_2
+                bool "The current sensor uses ADC2"
+        endchoice
+
+        config CURRENT_ADC_UNIT
+            depends on CURRENT_SENSOR
+            int
+            default 1 if CURRENT_ADC_UNIT_1
+            default 2 if CURRENT_ADC_UNIT_2
+
+        choice CURRENT_GPIO1
+            depends on CURRENT_ADC_UNIT_1
+            bool "Sensor ADC1 Channel"
+            default CURRENT_ADC1_CHANNEL_4
+            help
+                The channel of ADC1 used by CURRENT sensor.
+            config CURRENT_ADC1_CHANNEL_0
+                bool "ADC1 Channel 0 (GPIO 36)"
+            config CURRENT_ADC1_CHANNEL_1
+                bool "ADC1 Channel 1 (GPIO 37)"
+            config CURRENT_ADC1_CHANNEL_2
+                bool "ADC1 Channel 2 (GPIO 38)"
+            config CURRENT_ADC1_CHANNEL_3
+                bool "ADC1 Channel 3 (GPIO 39)"
+            config CURRENT_ADC1_CHANNEL_4
+                bool "ADC1 Channel 4 (GPIO 32)"
+            config CURRENT_ADC1_CHANNEL_5
+                bool "ADC1 Channel 5 (GPIO 33)"
+            config CURRENT_ADC1_CHANNEL_6
+                bool "ADC1 Channel 6 (GPIO 34)"
+            config CURRENT_ADC1_CHANNEL_7
+                bool "ADC1 Channel 7 (GPIO 35)"
+        endchoice
+        config CURRENT_GPIO1
+            int
+            default 0 if CURRENT_ADC1_CHANNEL_0
+            default 1 if CURRENT_ADC1_CHANNEL_1
+            default 2 if CURRENT_ADC1_CHANNEL_2
+            default 3 if CURRENT_ADC1_CHANNEL_3
+            default 4 if CURRENT_ADC1_CHANNEL_4
+            default 5 if CURRENT_ADC1_CHANNEL_5
+            default 6 if CURRENT_ADC1_CHANNEL_6
+            default 7 if CURRENT_ADC1_CHANNEL_7
+        
+        choice CURRENT_GPIO2
+            depends on CURRENT_ADC_UNIT_2
+            bool "Sensor ADC2 Channel"
+            default CURRENT_ADC2_CHANNEL_0
+            help
+                The channel of ADC1 used by CURRENT sensor.
+            config CURRENT_ADC2_CHANNEL_0
+                bool "ADC2 Channel 0 (GPIO 4)"
+            config CURRENT_ADC2_CHANNEL_1
+                bool "ADC2 Channel 1 (GPIO 0)"
+            config CURRENT_ADC2_CHANNEL_2
+                bool "ADC2 Channel 2 (GPIO 2)"
+            config CURRENT_ADC2_CHANNEL_3
+                bool "ADC2 Channel 3 (GPIO 15)"
+            config CURRENT_ADC2_CHANNEL_4
+                bool "ADC2 Channel 4 (GPIO 13)"
+            config CURRENT_ADC2_CHANNEL_5
+                bool "ADC2 Channel 5 (GPIO 12)"
+            config CURRENT_ADC2_CHANNEL_6
+                bool "ADC2 Channel 6 (GPIO 14)"
+            config CURRENT_ADC2_CHANNEL_7
+                bool "ADC2 Channel 7 (GPIO 27)"
+            config CURRENT_ADC2_CHANNEL_8
+                bool "ADC2 Channel 8 (GPIO 25)"
+            config CURRENT_ADC2_CHANNEL_9
+                bool "ADC2 Channel 9 (GPIO 26)"
+        endchoice
+
+        config CURRENT_GPIO2
+            int
+            default 0 if CURRENT_ADC2_CHANNEL_0
+            default 1 if CURRENT_ADC2_CHANNEL_1
+            default 2 if CURRENT_ADC2_CHANNEL_2
+            default 3 if CURRENT_ADC2_CHANNEL_3
+            default 4 if CURRENT_ADC2_CHANNEL_4
+            default 5 if CURRENT_ADC2_CHANNEL_5
+            default 6 if CURRENT_ADC2_CHANNEL_6
+            default 7 if CURRENT_ADC2_CHANNEL_7
+            default 8 if CURRENT_ADC2_CHANNEL_8
+            default 9 if CURRENT_ADC2_CHANNEL_9
+            
+        config CURRENT_CHANNEL
+            int
+            default CURRENT_GPIO1 if CURRENT_ADC_UNIT_1
+            default CURRENT_GPIO2 if CURRENT_ADC_UNIT_2
+
+        choice CURRENT_ATTEN
+            depends on CURRENT_SENSOR
+            bool "Select ADC attenuation"
+            default CURRENT_ADC_ATTENUATION_0
+            help
+                Esp32 has 2 SARS ADC's, ADC1 and ADC2. ADC2 is used by wi-fi, therefore, is extremely recommended choose ADC1
+            config CURRENT_ADC_ATTENUATION_0
+                bool "ADC attenuation 0db"
+            config CURRENT_ADC_ATTENUATION_2_5
+                bool "ADC attenuation 2.5db"
+            config CURRENT_ADC_ATTENUATION_6
+                bool "ADC attenuation 6db"
+            config CURRENT_ADC_ATTENUATION_11
+                 bool "ADC attenuation 11db"
+                    
+        endchoice
+                    
+        config CURRENT_ATTEN
+            int
+            default 0 if CURRENT_ADC_ATTENUATION_0
+            default 1 if CURRENT_ADC_ATTENUATION_2_5
+            default 2 if CURRENT_ADC_ATTENUATION_6
+            default 3 if CURRENT_ADC_ATTENUATION_11
+                    
+        config CURRENT_OFFSET
+            int "Current signal offset"
+            depends on CURRENT_SENSOR
+            default 540
+            help
+                The sensor signal has a DC component?
+        
+        
+        choice CURRENT_BURDEN
+            depends on CURRENT_SENSOR
+            bool "Current sensor Burden Resistor"
+            default BURDEN_22
+            help
+                The channel of ADC1 used by CURRENT sensor.
+            config BURDEN_82
+                string "R82CH0"
+            config BURDEN_47
+                string "R47CH0"
+            config BURDEN_22
+                string "R22CH0"
+        
+        endchoice
+
+        config CURRENT_CROSSINGS
+            int "Number of crossings to sample"
+            depends on CURRENT_SENSOR
+            default 100
+            help
+                How many crossings do you want to sample?
+
+        config CURRENT_TIMEMOUT
+            int "Maxiumum time spent in sampling (ms)"
+            depends on CURRENT_SENSOR
+            default 2000
+            help
+                How many time the logger can spent sampling the signal? Consider a signal frequency and number of crossings
+
+    
+
+    endmenu
+
+    menu "Extra Current sensor"
+        config EX_CURRENT_SENSOR
+            bool "Enable"
+            default n
+            help
+                This logger has a current sensor?
+
+        choice EX_CURRENT_SELECT_ADC
+            depends on EX_CURRENT_SENSOR
+            bool "Select current sensor ADC"
+            default EX_CURRENT_ADC_UNIT_1
+            help
+                Esp32 has 2 SARS ADC's, ADC1 and ADC2. ADC2 is used by wi-fi, therefore, is extremely recommended choose ADC1
+            config EX_CURRENT_ADC_UNIT_1
+                bool "The current sensor uses ADC1"
+            config EX_CURRENT_ADC_UNIT_2
+                bool "The current sensor uses ADC2"
+        endchoice
+
+        config EX_CURRENT_ADC_UNIT
+            depends on EX_CURRENT_SENSOR
+            int
+            default 1 if EX_CURRENT_ADC_UNIT_1
+            default 2 if EX_CURRENT_ADC_UNIT_2
+
+        choice EX_CURRENT_GPIO1
+            depends on EX_CURRENT_ADC_UNIT_1
+            bool "Sensor ADC1 Channel"
+            default EX_CURRENT_ADC1_CHANNEL_5
+            help
+                The channel of ADC1 used by CURRENT sensor.
+            config EX_CURRENT_ADC1_CHANNEL_0
+                bool "ADC1 Channel 0 (GPIO 36)"
+            config EX_CURRENT_ADC1_CHANNEL_1
+                bool "ADC1 Channel 1 (GPIO 37)"
+            config EX_CURRENT_ADC1_CHANNEL_2
+                bool "ADC1 Channel 2 (GPIO 38)"
+            config EX_CURRENT_ADC1_CHANNEL_3
+                bool "ADC1 Channel 3 (GPIO 39)"
+            config EX_CURRENT_ADC1_CHANNEL_4
+                bool "ADC1 Channel 4 (GPIO 32)"
+            config EX_CURRENT_ADC1_CHANNEL_5
+                bool "ADC1 Channel 5 (GPIO 33)"
+            config EX_CURRENT_ADC1_CHANNEL_6
+                bool "ADC1 Channel 6 (GPIO 34)"
+            config EX_CURRENT_ADC1_CHANNEL_7
+                bool "ADC1 Channel 7 (GPIO 35)"
+        endchoice
+        config EX_CURRENT_GPIO1
+            int
+            default 0 if EX_CURRENT_ADC1_CHANNEL_0
+            default 1 if EX_CURRENT_ADC1_CHANNEL_1
+            default 2 if EX_CURRENT_ADC1_CHANNEL_2
+            default 3 if EX_CURRENT_ADC1_CHANNEL_3
+            default 4 if EX_CURRENT_ADC1_CHANNEL_4
+            default 5 if EX_CURRENT_ADC1_CHANNEL_5
+            default 6 if EX_CURRENT_ADC1_CHANNEL_6
+            default 7 if EX_CURRENT_ADC1_CHANNEL_7
+        
+        choice EX_CURRENT_GPIO2
+            depends on EX_CURRENT_ADC_UNIT_2
+            bool "Sensor ADC2 Channel"
+            default EX_CURRENT_ADC2_CHANNEL_0
+            help
+                The channel of ADC1 used by CURRENT sensor.
+            config EX_CURRENT_ADC2_CHANNEL_0
+                bool "ADC2 Channel 0 (GPIO 4)"
+            config EX_CURRENT_ADC2_CHANNEL_1
+                bool "ADC2 Channel 1 (GPIO 0)"
+            config EX_CURRENT_ADC2_CHANNEL_2
+                bool "ADC2 Channel 2 (GPIO 2)"
+            config EX_CURRENT_ADC2_CHANNEL_3
+                bool "ADC2 Channel 3 (GPIO 15)"
+            config EX_CURRENT_ADC2_CHANNEL_4
+                bool "ADC2 Channel 4 (GPIO 13)"
+            config EX_CURRENT_ADC2_CHANNEL_5
+                bool "ADC2 Channel 5 (GPIO 12)"
+            config EX_CURRENT_ADC2_CHANNEL_6
+                bool "ADC2 Channel 6 (GPIO 14)"
+            config EX_CURRENT_ADC2_CHANNEL_7
+                bool "ADC2 Channel 7 (GPIO 27)"
+            config EX_CURRENT_ADC2_CHANNEL_8
+                bool "ADC2 Channel 8 (GPIO 25)"
+            config EX_CURRENT_ADC2_CHANNEL_9
+                bool "ADC2 Channel 9 (GPIO 26)"
+        endchoice
+
+        config EX_CURRENT_GPIO2
+            int
+            default 0 if EX_CURRENT_ADC2_CHANNEL_0
+            default 1 if EX_CURRENT_ADC2_CHANNEL_1
+            default 2 if EX_CURRENT_ADC2_CHANNEL_2
+            default 3 if EX_CURRENT_ADC2_CHANNEL_3
+            default 4 if EX_CURRENT_ADC2_CHANNEL_4
+            default 5 if EX_CURRENT_ADC2_CHANNEL_5
+            default 6 if EX_CURRENT_ADC2_CHANNEL_6
+            default 7 if EX_CURRENT_ADC2_CHANNEL_7
+            default 8 if EX_CURRENT_ADC2_CHANNEL_8
+            default 9 if EX_CURRENT_ADC2_CHANNEL_9
+            
+        config EX_CURRENT_CHANNEL
+            int
+            default EX_CURRENT_GPIO1 if EX_CURRENT_ADC_UNIT_1
+            default EX_CURRENT_GPIO2 if EX_CURRENT_ADC_UNIT_2
+
+        choice EX_CURRENT_ATTEN
+            depends on EX_CURRENT_SENSOR
+            bool "Select ADC attenuation"
+            default EX_CURRENT_ADC_ATTENUATION_0
+            help
+                Esp32 has 2 SARS ADC's, ADC1 and ADC2. ADC2 is used by wi-fi, therefore, is extremely recommended choose ADC1
+            config EX_CURRENT_ADC_ATTENUATION_0
+                bool "ADC attenuation 0db"
+            config EX_CURRENT_ADC_ATTENUATION_2_5
+                bool "ADC attenuation 2.5db"
+            config EX_CURRENT_ADC_ATTENUATION_6
+                bool "ADC attenuation 6db"
+            config EX_CURRENT_ADC_ATTENUATION_11
+                 bool "ADC attenuation 11db"
+                    
+        endchoice
+                    
+        config EX_CURRENT_ATTEN
+            int
+            default 0 if EX_CURRENT_ADC_ATTENUATION_0
+            default 1 if EX_CURRENT_ADC_ATTENUATION_2_5
+            default 2 if EX_CURRENT_ADC_ATTENUATION_6
+            default 3 if EX_CURRENT_ADC_ATTENUATION_11
+                    
+        config EX_CURRENT_OFFSET
+            int "Current signal offset"
+            depends on EX_CURRENT_SENSOR
+            default 540
+            help
+                The sensor signal has a DC component?
+
+        choice EX_CURRENT_BURDEN
+            depends on EX_CURRENT_SENSOR
+            bool "Current sensor Burden Resistor"
+            default EX_BURDEN_22
+            help
+                The channel of ADC1 used by CURRENT sensor.
+            config EX_BURDEN_82
+                string "R82CH1"
+            config EX_BURDEN_47
+                string "R47CH1"
+            config EX_BURDEN_22
+                string "R22CH1"
+            
+        endchoice
+
+        config EX_CURRENT_CROSSINGS
+            int "Number of crossings to sample"
+            depends on EX_CURRENT_SENSOR
+            default 100
+            help
+                How many crossings do you want to sample?
+
+        config EX_CURRENT_TIMEMOUT
+            int "Maxiumum time spent in sampling (ms)"
+            depends on EX_CURRENT_SENSOR
+            default 2000
+            help
+                How many time the logger can spent sampling the signal? Consider a signal frequency and number of crossings
+
+    
+
+    endmenu
+
+
+
+
+    menu "DHT11 sensor"
+        config DHT_SENSOR
+            bool "Enable"
+            default n
+            help
+                This logger has a current sensor?
+
+        choice DHT_SELECT_ADC
+            depends on DHT_SENSOR
+            bool "Select temperature/humidity sensor ADC"
+            default DHT_ADC_UNIT_2
+            help
+                Esp32 has 2 SARS ADC's, ADC1 and ADC2. ADC2 is used by wi-fi, therefore, is extremely recommended choose ADC1
+            config DHT_ADC_UNIT_1
+                bool "The temperature/humidity sensor uses ADC1"
+            config DHT_ADC_UNIT_2
+                bool "The temperature/humidity sensor uses ADC2"
+        endchoice
+
+        config DHT_ADC_UNIT
+            depends on DHT_SENSOR
+            int
+            default 1 if DHT_ADC_UNIT_1
+            default 2 if DHT_ADC_UNIT_2
+
+        choice DHT_GPIO1
+            depends on DHT_ADC_UNIT_1
+            bool "Sensor uses ADC1 Channel"
+            default DHT_ADC1_CHANNEL_6
+            help
+                The channel of ADC1 used by CURRENT sensor.
+            config DHT_ADC1_CHANNEL_0
+                bool "ADC1 Channel 0 (GPIO 36)"
+            config DHT_ADC1_CHANNEL_1
+                bool "ADC1 Channel 1 (GPIO 37)"
+            config DHT_ADC1_CHANNEL_2
+                bool "ADC1 Channel 2 (GPIO 38)"
+            config DHT_ADC1_CHANNEL_3
+                bool "ADC1 Channel 3 (GPIO 39)"
+            config DHT_ADC1_CHANNEL_4
+                bool "ADC1 Channel 4 (GPIO 32)"
+            config DHT_ADC1_CHANNEL_5
+                bool "ADC1 Channel 5 (GPIO 33)"
+            config DHT_ADC1_CHANNEL_6
+                bool "ADC1 Channel 6 (GPIO 34)"
+            config DHT_ADC1_CHANNEL_7
+                bool "ADC1 Channel 7 (GPIO 35)"
+        endchoice
+
+        config DHT_GPIO1
+            int
+            default 32 if DHT_ADC1_CHANNEL_4
+            default 33 if DHT_ADC1_CHANNEL_5
+            default 34 if DHT_ADC1_CHANNEL_6
+            default 35 if DHT_ADC1_CHANNEL_7
+  
+
+        choice DHT_GPIO2
+            depends on DHT_ADC_UNIT_2
+            bool "Sensor uses ADC2 Channel"
+            default DHT_ADC2_CHANNEL_3
+            help
+                The channel of ADC1 used by CURRENT sensor.
+            config DHT_ADC2_CHANNEL_0
+                bool "ADC2 Channel 0 (GPIO 4)"
+            config DHT_ADC2_CHANNEL_1
+                bool "ADC2 Channel 1 (GPIO 0)"
+            config DHT_ADC2_CHANNEL_2
+                bool "ADC2 Channel 2 (GPIO 2)"
+            config DHT_ADC2_CHANNEL_3
+                bool "ADC2 Channel 3 (GPIO 15)"
+            config DHT_ADC2_CHANNEL_4
+                bool "ADC2 Channel 4 (GPIO 13)"
+            config DHT_ADC2_CHANNEL_5
+                bool "ADC2 Channel 5 (GPIO 12)"
+            config DHT_ADC2_CHANNEL_6
+                bool "ADC2 Channel 6 (GPIO 14)"
+            config DHT_ADC2_CHANNEL_7
+                bool "ADC2 Channel 7 (GPIO 27)"
+            config DHT_ADC2_CHANNEL_8
+                bool "ADC2 Channel 8 (GPIO 25)"
+            config DHT_ADC2_CHANNEL_9
+                bool "ADC2 Channel 9 (GPIO 26)"
+        endchoice
+
+        config DHT_GPIO2
+            int
+            default 4 if DHT_ADC2_CHANNEL_0
+            default 0 if DHT_ADC2_CHANNEL_1
+            default 2 if DHT_ADC2_CHANNEL_2
+            default 15 if DHT_ADC2_CHANNEL_3
+            default 13 if DHT_ADC2_CHANNEL_4
+            default 12 if DHT_ADC2_CHANNEL_5
+            default 14 if DHT_ADC2_CHANNEL_6
+            default 27 if DHT_ADC2_CHANNEL_7
+            default 25 if DHT_ADC2_CHANNEL_8
+            default 26 if DHT_ADC2_CHANNEL_9
+        
+        config DHT_PIN
+            int
+            default DHT_GPIO1 if DHT_ADC_UNIT_1
+            default DHT_GPIO2 if DHT_ADC_UNIT_2
+            
+    endmenu
+
+    menu "SHTC3 sensor"
+        config SHTC3_SENSOR
+            bool "Enable"
+            default n
+            help
+                This logger has a SHTC3 sensor?
+    endmenu
+
+    menu "People counter sensor"
+        config PPL_SENSOR
+            bool "Enable"
+            default n
+            help
+                This logger has a people counter sensor?
+    endmenu
+
+    menu "LDR sensor"
+        config LDR_SENSOR
+            bool "Enable"
+            default n
+            help
+                This logger has a current sensor?
+
+        choice LDR_SELECT_ADC
+            depends on LDR_SENSOR
+            bool "Select temperature/humidity sensor ADC"
+            default LDR_ADC_UNIT_2
+            help
+                Esp32 has 2 SARS ADC's, ADC1 and ADC2. ADC2 is used by wi-fi, therefore, is extremely recommended choose ADC1
+            config LDR_ADC_UNIT_1
+                bool "The temperature/humidity sensor uses ADC1"
+            config LDR_ADC_UNIT_2
+                bool "The temperature/humidity sensor uses ADC2"
+        endchoice
+        
+        
+        config LDR_ADC_UNIT
+            depends on LDR_SENSOR
+            int
+            default 1 if LDR_ADC_UNIT_1
+            default 2 if LDR_ADC_UNIT_2
+
+        choice LDR_GPIO1
+            depends on LDR_ADC_UNIT_1
+            bool "Sensor uses ADC1 Channel"
+            default LDR_ADC1_CHANNEL_7
+            help
+                The channel of ADC1 used by CURRENT sensor.
+            config LDR_ADC1_CHANNEL_0
+                bool "ADC1 Channel 0 (GPIO 36)"
+            config LDR_ADC1_CHANNEL_1
+                bool "ADC1 Channel 1 (GPIO 37)"
+            config LDR_ADC1_CHANNEL_2
+                bool "ADC1 Channel 2 (GPIO 38)"
+            config LDR_ADC1_CHANNEL_3
+                bool "ADC1 Channel 3 (GPIO 39)"
+            config LDR_ADC1_CHANNEL_4
+                bool "ADC1 Channel 4 (GPIO 32)"
+            config LDR_ADC1_CHANNEL_5
+                bool "ADC1 Channel 5 (GPIO 33)"
+            config LDR_ADC1_CHANNEL_6
+                bool "ADC1 Channel 6 (GPIO 34)"
+            config LDR_ADC1_CHANNEL_7
+                bool "ADC1 Channel 7 (GPIO 35)"
+        endchoice
+
+        config LDR_GPIO1
+            int
+            default 0 if LDR_ADC1_CHANNEL_0
+            default 1 if LDR_ADC1_CHANNEL_1
+            default 2 if LDR_ADC1_CHANNEL_2
+            default 3 if LDR_ADC1_CHANNEL_3
+            default 4 if LDR_ADC1_CHANNEL_4
+            default 5 if LDR_ADC1_CHANNEL_5
+            default 6 if LDR_ADC1_CHANNEL_6
+            default 7 if LDR_ADC1_CHANNEL_7
+
+        choice LDR_GPIO2
+            depends on LDR_ADC_UNIT_2
+            bool "Sensor uses ADC2 Channel"
+            default LDR_ADC2_CHANNEL_8
+            help
+                The channel of ADC1 used by CURRENT sensor.
+            config LDR_ADC2_CHANNEL_0
+                bool "ADC2 Channel 0 (GPIO 4)"
+            config LDR_ADC2_CHANNEL_1
+                bool "ADC2 Channel 1 (GPIO 0)"
+            config LDR_ADC2_CHANNEL_2
+                bool "ADC2 Channel 2 (GPIO 2)"
+            config LDR_ADC2_CHANNEL_3
+                bool "ADC2 Channel 3 (GPIO 15)"
+            config LDR_ADC2_CHANNEL_4
+                bool "ADC2 Channel 4 (GPIO 13)"
+            config LDR_ADC2_CHANNEL_5
+                bool "ADC2 Channel 5 (GPIO 12)"
+            config LDR_ADC2_CHANNEL_6
+                bool "ADC2 Channel 6 (GPIO 14)"
+            config LDR_ADC2_CHANNEL_7
+                bool "ADC2 Channel 7 (GPIO 27)"
+            config LDR_ADC2_CHANNEL_8
+                bool "ADC2 Channel 8 (GPIO 25)"
+            config LDR_ADC2_CHANNEL_9
+                bool "ADC2 Channel 9 (GPIO 26)"
+        endchoice
+
+        config LDR_GPIO2
+            int
+            default 0 if LDR_ADC2_CHANNEL_0
+            default 1 if LDR_ADC2_CHANNEL_1
+            default 2 if LDR_ADC2_CHANNEL_2
+            default 3 if LDR_ADC2_CHANNEL_3
+            default 4 if LDR_ADC2_CHANNEL_4
+            default 5 if LDR_ADC2_CHANNEL_5
+            default 6 if LDR_ADC2_CHANNEL_6
+            default 7 if LDR_ADC2_CHANNEL_7
+            default 8 if LDR_ADC2_CHANNEL_8
+            default 9 if LDR_ADC2_CHANNEL_9
+        
+        config LDR_CHANNEL
+            int
+            default LDR_GPIO1 if LDR_ADC_UNIT_1
+            default LDR_GPIO2 if LDR_ADC_UNIT_2
+
+        choice LDR_ATTEN
+            depends on LDR_SENSOR
+            bool "Select ADC attenuation"
+            default LDR_ADC_ATTENUATION_11
+            help
+                Esp32 has 2 SARS ADC's, ADC1 and ADC2. ADC2 is used by wi-fi, therefore, is extremely recommended choose ADC1
+            config LDR_ADC_ATTENUATION_0
+                bool "ADC attenuation 0db"
+            config LDR_ADC_ATTENUATION_2_5
+                bool "ADC attenuation 2.5db"
+            config LDR_ADC_ATTENUATION_6
+                bool "ADC attenuation 6db"
+            config LDR_ADC_ATTENUATION_11
+                 bool "ADC attenuation 11db"
+                    
+        endchoice
+                    
+        config LDR_ATTEN
+            int
+            default 0 if LDR_ADC_ATTENUATION_0
+            default 1 if LDR_ADC_ATTENUATION_2_5
+            default 2 if LDR_ADC_ATTENUATION_6
+            default 3 if LDR_ADC_ATTENUATION_11
+            
+    endmenu
+        
+endmenu
